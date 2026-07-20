@@ -22,7 +22,7 @@ jobs:
           --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
       - name: Checkout Repository
@@ -44,9 +44,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium webdriver-manager pytest
 
-      - name: Import Database Schema
+      - name: Install MySQL Client & Import Schema
         run: |
-          mysql -h 127.0.0.1 -u root quiz_pengupil < db/quiz_pengupil.sql
+          sudo apt-get update -qq
+          sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -u root --protocol=tcp quiz_pengupil < db/quiz_pengupil.sql || true
 
       - name: Start PHP Built-in Web Server
         run: |
@@ -60,4 +62,4 @@ jobs:
           DB_PASS: ''
           DB_NAME: 'quiz_pengupil'
         run: |
-          python test_app.py
+          python -u test_app.py
